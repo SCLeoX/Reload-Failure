@@ -1,0 +1,20 @@
+{
+  "name": "restart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "watchify src/index.ts -p tsify -o dist/bundle.js --debug"
+  },
+  "author": "SCLeo",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.59",
+    "tsify": "^3.0.1",
+    "typescript": "^2.2.2",
+    "watchify": "^3.9.0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "outDir": "./dist/tsout",
+    "strictNullChecks": true,
+    "experimentalDecorators": true,
+    "target": "es5",
+    "sourceMap": true
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}
