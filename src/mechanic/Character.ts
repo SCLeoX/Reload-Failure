@@ -18,14 +18,27 @@ export default class Character extends RotatablePixelStaticRenderableGameObject 
   layer: LayerIdentifier = LayerIdentifier.PLAYER;
 
   public impassableQuery: Query<Impassable>;
-
   public speed: number = 300;
-
   public alive: boolean = true;
+  public fov: number = 0;
+  public startFov: number = 0;
+  public targetFov: number = Math.PI * 2 / 3;
+  public fovChangeTimer: number = 0;
 
   public onTick(deltaT: number): void {
     if (!this.game) {
       return;
+    }
+
+    if (this.fov === this.targetFov || this.fovChangeTimer >= 1) {
+      this.fovChangeTimer = 0;
+      this.startFov = this.fov = this.targetFov;
+    } else {
+      this.fovChangeTimer += 0.03;
+      const t = this.fovChangeTimer;
+      this.fov = this.startFov +
+        (this.targetFov - this.startFov) *
+          (t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1)
     }
 
     const input = this.game.input;
@@ -124,6 +137,7 @@ export default class Character extends RotatablePixelStaticRenderableGameObject 
 
   public kill() {
     this.alive = false;
+    this.targetFov = Math.PI * 2;
     this.changeTexture(this.corpseTexture);
   }
 

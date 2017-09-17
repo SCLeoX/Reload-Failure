@@ -73,6 +73,8 @@ export function getAngle(point1: Vector2, point2: Vector2): number {
     if (point1.x > point2.x) {
       angle += Math.PI;
     }
-    return angle;
+    return angle < 0
+      ? angle + Math.PI * 2
+      : angle;
   }
 }

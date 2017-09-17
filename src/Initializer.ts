@@ -55,7 +55,7 @@ export default class Initializer {
     character.attachToGame(this.game);
     const camera = new Camera(character.position, new Vector2(this.game.canvas.width, this.game.canvas.height));
     camera.attachToGame(this.game);
-    const warFog = new WarFog(character.position, camera);
+    const warFog = new WarFog(character, camera);
     warFog.attachToGame(this.game);
     const score = new Score(textures.get('font') as TextureGroup, character);
     score.attachToGame(this.game);

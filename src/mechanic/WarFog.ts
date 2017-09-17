@@ -7,6 +7,7 @@ import { TickSubscriber } from './TickSubscriber';
 import { WarFogSource, isWarFogSource } from './WarFogSource';
 import * as _ from 'lodash';
 import Camera from './Camera';
+import Character from "./Character";
 import Game from './../Game';
 import Ray from './../geometry/Ray';
 import RelativeVector2 from './../geometry/RelativeVector2';
@@ -55,16 +56,18 @@ export default class WarFog extends RenderableGameObject {
 
   public query: Query<WarFogSource>;
   public pov: Vector2;
+  public character: Character;
 
   public attachToGame(game: Game) {
     super.attachToGame(game);
     this.query = (this.objectsPool as ObjectsPool).createQuery<WarFogSource>(isWarFogSource);
   }
   
-  constructor(pov: Vector2, camera: Camera) {
+  constructor(character: Character, camera: Camera) {
     super();
     this.renderInstruction = new WarFogRenderInstruction(camera);
-    this.pov = pov;
+    this.pov = character.position;
+    this.character = character;
   }
 
   public updateRenderInstruction() {
@@ -104,6 +107,10 @@ export default class WarFog extends RenderableGameObject {
       }
       return closetAt;
     }
+    const px = this.pov.x;
+    const py = this.pov.y;
+    const characterAngle = this.character.angle;
+    const fov = this.character.fov;
     this.renderInstruction.points = _(segments)
       // Cast three lines towards the surroundings of each endpoint of each
       // segment.
@@ -116,9 +123,34 @@ export default class WarFog extends RenderableGameObject {
         [segment.point2.x - 0.01, segment.point2.y - 0.01],
       ])
       .flatten()
+      .concat([
+        [
+          px + Math.cos(characterAngle + fov / 2) * 100,
+          py + Math.sin(characterAngle + fov / 2) * 100
+        ],
+        [
+          px + Math.cos(characterAngle - fov / 2) * 100,
+          py + Math.sin(characterAngle - fov / 2) * 100
+        ],
+      ])
       .map(([x, y]) => shootLight(x, y))
       .filter(point => point !== null)
-      .sortBy(point => origin.getAngleWith(point as Vector2))
+      .map(point => [ point, origin.getAngleWith(point as Vector2) ])
+      .sortBy(pointAngle => pointAngle[1])
+      .map(pointAngle => {
+        const angle = (pointAngle as [Vector2, number])[1];
+        let bound1 = characterAngle - fov / 2 - 0.01;
+        let bound2 = characterAngle + fov / 2 + 0.01;
+        if (bound1 <= 0) {
+          bound1 += 2 * Math.PI;
+          bound2 += 2 * Math.PI;
+        }
+        if ((angle > bound1 && angle < bound2) || (angle + 2 * Math.PI > bound1 && angle + 2 * Math.PI < bound2)) {
+          return pointAngle[0];
+        } else {
+          return this.pov;
+        }
+      })
       .value() as Array<Vector2>;
   }
   
